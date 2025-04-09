@@ -35,3 +35,12 @@ CREATE TABLE UserInfo (
     [height] INT,
     [goal] VARCHAR(50)
 );
+
+SELECT * FROM UserInfo
+
+CREATE TABLE CalorieHistory (
+    [id] INT PRIMARY KEY IDENTITY,
+    [email] VARCHAR(100) FOREIGN KEY REFERENCES Users(email),
+    [calories] INT,
+    [timestamp] DATETIME DEFAULT GETDATE()
+);
