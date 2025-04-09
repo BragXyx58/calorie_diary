@@ -46,9 +46,50 @@ def login():
     if response == 'login_success':
         messagebox.showinfo("Успех", "Вход выполнен")
         show_user_info(email)
+
+        data = {"action": "get_user_info", "email": email}
+        user_data_json = send_to_server(data)
+
+        if user_data_json != 'no_data' and user_data_json != 'error':
+            user_data = jsonpickle.decode(user_data_json)
+            entry_name.delete(0, tk.END)
+            entry_name.insert(0, user_data['name'])
+
+            var_gender.set(user_data['gender'])
+
+            entry_birth.delete(0, tk.END)
+            entry_birth.insert(0, user_data['birthdate'])
+
+            entry_weight.delete(0, tk.END)
+            entry_weight.insert(0, user_data['weight'])
+
+            entry_height.delete(0, tk.END)
+            entry_height.insert(0, user_data['height'])
+
+            var_goal.set(user_data['goal'])
     else:
         messagebox.showerror("Ошибка", "Неверная почта или пароль")
+def load_user_info(email):
+    data = {"action": "get_user_info", "email": email}
+    response = send_to_server(data)
+    user_data = jsonpickle.decode(response)
 
+    if user_data:
+        entry_name.delete(0, tk.END)
+        entry_name.insert(0, user_data.get("name", ""))
+
+        var_gender.set(user_data.get("gender", "Мужской"))
+
+        entry_birth.delete(0, tk.END)
+        entry_birth.insert(0, user_data.get("birthdate", ""))
+
+        entry_weight.delete(0, tk.END)
+        entry_weight.insert(0, str(user_data.get("weight", "")))
+
+        entry_height.delete(0, tk.END)
+        entry_height.insert(0, str(user_data.get("height", "")))
+
+        var_goal.set(user_data.get("goal", "Поддержание"))
 def show_register():
     login_frame.pack_forget()
     register_frame.pack()
@@ -97,10 +138,41 @@ def submit_user_info():
 
     if response == 'info_saved':
         messagebox.showinfo("Сохранено", "Информация сохранена")
-        root.destroy()
+        show_calorie_calc()
     else:
         messagebox.showerror("Ошибка", "Ошибка при сохранении информации")
+def show_calorie_calc():
+    user_info_frame.pack_forget()
+    calories_frame.pack()
 
+def calculate_calories():
+    gender = var_gender.get()
+    try:
+        weight = float(entry_weight.get())
+        height = float(entry_height.get())
+        age = (datetime.now().date() - datetime.strptime(entry_birth.get(), "%d.%m.%Y").date()).days // 365
+    except:
+        messagebox.showerror("Ошибка", "Некорректные данные")
+        return
+
+    activity = var_activity.get()
+    multiplier = {"Низкий": 1.2, "Средний": 1.55, "Высокий": 1.9}.get(activity, 1.2)
+
+    if gender == "Мужской":
+        bmr = 88.36 + 13.4 * weight + 4.8 * height - 5.7 * age
+    else:
+        bmr = 447.6 + 9.2 * weight + 3.1 * height - 4.3 * age
+
+    result = round(bmr * multiplier)
+
+    lbl_result.config(text=f"Ваша дневная норма: {result} ккал")
+
+    data = {
+        "action": "save_calorie_result",
+        "email": user_email_label.cget("text").split(": ")[1],
+        "calories": result
+    }
+    send_to_server(data)
 
 root = tk.Tk()
 root.title("Калорийный дневник")
@@ -160,6 +232,15 @@ var_goal = tk.StringVar()
 tk.OptionMenu(user_info_frame, var_goal, "Похудение", "Поддержание", "Набор массы").grid(row=6, column=1)
 
 tk.Button(user_info_frame, text="Сохранить", command=submit_user_info).grid(row=7, column=0, columnspan=2)
+tk.Button(user_info_frame, text="Перейти к расчёту калорий", command=show_calorie_calc).grid(row=8, column=0, columnspan=2)
 
+calories_frame = tk.Frame(root)
+tk.Label(calories_frame, text="Выберите уровень активности").grid(row=0, column=0)
+var_activity = tk.StringVar(value="Средний")
+tk.OptionMenu(calories_frame, var_activity, "Низкий", "Средний", "Высокий").grid(row=0, column=1)
+
+tk.Button(calories_frame, text="Рассчитать", command=calculate_calories).grid(row=1, column=0, columnspan=2)
+lbl_result = tk.Label(calories_frame, text="")
+lbl_result.grid(row=2, column=0, columnspan=2)
 show_login()
 root.mainloop()
