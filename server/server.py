@@ -7,7 +7,7 @@ server.bind(('localhost', 4000))
 server.listen(1)
 serverdb = 'localhost\\SQLEXPRESS'
 database = 'calorie_diary_db'
-conn_str = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+conn_str = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={serverdb};DATABASE={database};Trusted_Connection=yes;'
 db = pyodbc.connect(conn_str)
 cursor = db.cursor()
 
