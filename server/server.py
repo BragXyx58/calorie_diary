@@ -26,6 +26,8 @@ def login_user(data):
     password = data['password']
     cursor.execute("SELECT * FROM Users WHERE email = ? AND password = ?", (email, password))
     if cursor.fetchone():
+        cursor.execute("INSERT INTO logs_reg_aut (email, action_type) VALUES (?, 'login')", (email,))
+        db.commit()
         return 'login_success'
     return 'login_failed'
 

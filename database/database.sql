@@ -2,7 +2,25 @@ CREATE DATABASE calorie_diary_db
 USE calorie_diary_db
 
 CREATE TABLE Users (
-    [ID] INT PRIMARY KEY IDENTITY,
-    [Email] VARCHAR(100) NOT NULL UNIQUE,
-    [Password] VARCHAR(100) NOT NULL
+    [id] INT PRIMARY KEY IDENTITY,
+    [email] VARCHAR(100) NOT NULL UNIQUE,
+    [password] VARCHAR(100) NOT NULL
 );
+
+CREATE TABLE Logs_reg_aut (
+    [id] INT IDENTITY PRIMARY KEY,
+    [email] VARCHAR(255),
+    [action_type] VARCHAR(20),
+    [action_time] DATETIME DEFAULT GETDATE()
+);
+
+CREATE TRIGGER trg_register_log
+ON Users
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO logs_reg_aut (email, action_type)
+    SELECT email, 'register' FROM inserted;
+END;
+
+SELECT * FROM Logs_reg_aut
