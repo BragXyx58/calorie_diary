@@ -32,6 +32,7 @@ def login_user(data):
     return 'login_failed'
 def save_user_info(data):
     try:
+        print(f"Сохраняем данные пользователя: {data}")
         cursor.execute("""
             INSERT INTO UserInfo (email, name, gender, birthdate, weight, height, goal)
             VALUES (?, ?, ?, ?, ?, ?, ?)""",
@@ -39,7 +40,8 @@ def save_user_info(data):
              data['weight'], data['height'], data['goal']))
         db.commit()
         return 'info_saved'
-    except:
+    except Exception as e:
+        print(f"Ошибка при сохранении данных: {e}")
         return 'info_error'
 
 while True:
