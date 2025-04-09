@@ -30,6 +30,17 @@ def login_user(data):
         db.commit()
         return 'login_success'
     return 'login_failed'
+def save_user_info(data):
+    try:
+        cursor.execute("""
+            INSERT INTO UserInfo (email, name, gender, birthdate, weight, height, goal)
+            VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (data['email'], data['name'], data['gender'], data['birthdate'],
+             data['weight'], data['height'], data['goal']))
+        db.commit()
+        return 'info_saved'
+    except:
+        return 'info_error'
 
 while True:
     client, addr = server.accept()
@@ -40,6 +51,8 @@ while True:
         result = register_user(obj)
     elif obj['action'] == 'login':
         result = login_user(obj)
+    elif obj['action'] == 'user_info':
+        result = save_user_info(obj)
     else:
         result = 'unknown_action'
 
