@@ -24,3 +24,14 @@ BEGIN
 END;
 
 SELECT * FROM Logs_reg_aut
+
+CREATE TABLE UserInfo (
+    [id] INT IDENTITY PRIMARY KEY,
+    [email] VARCHAR(100) FOREIGN KEY REFERENCES Users(email),
+    [name] VARCHAR(100),
+    [gender] VARCHAR(10),
+    [birthdate] DATE,
+    [weight] INT,
+    [height] INT,
+    [goal] VARCHAR(50)
+);
